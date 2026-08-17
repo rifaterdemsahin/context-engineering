@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Context Engineering for Dummies — Visual Storyboard</title>
+    <style>
+        :root {
+            --bg-page: #0f141c;
+            --bg-card: #18202c;
+            --bg-card-hover: #1f2a3a;
+            --accent-primary: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.15);
+            --accent-emerald: #34d399;
+            --accent-amber: #fbbf24;
+            --accent-rose: #f43f5e;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-subtle: #2d3b4e;
+            --code-bg: #0b0f17;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            padding: 2.5rem 1.5rem 5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header section */
+        header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .tag-pill {
+            display: inline-block;
+            background: var(--accent-glow);
+            color: var(--accent-primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            margin-bottom: 1rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #ffffff 40%, var(--accent-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Storyboard Grid */
+        .storyboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+        }
+
+        /* Scene Card */
+        .scene-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        @media (max-width: 900px) {
+            .scene-card {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .scene-card:hover {
+            border-color: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        /* Visual Frame / Image Upload Area */
+        .scene-visual {
+            background: #111722;
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            min-height: 380px;
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .scene-visual {
+                border-right: none;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+        }
+
+        .image-preview-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 340px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: none;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+        }
+
+        .upload-placeholder {
+            border: 2px dashed #334155;
+            border-radius: 12px;
+            width: 100%;
+            height: 100%;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        .upload-placeholder:hover {
+            border-color: var(--accent-primary);
+            background: var(--accent-glow);
+        }
+
+        .upload-placeholder svg {
+            width: 48px;
+            height: 48px;
+            stroke: var(--text-muted);
+            margin-bottom: 1rem;
+            transition: stroke 0.2s;
+        }
+
+        .upload-placeholder:hover svg {
+            stroke: var(--accent-primary);
+        }
+
+        .upload-placeholder span.primary-text {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .upload-placeholder span.hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .change-image-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-main);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: none;
+            transition: background 0.2s;
+        }
+
+        .change-image-btn:hover {
+            background: var(--accent-primary);
+            color: #000;
+        }
+
+        /* Scene Narrative & Content */
+        .scene-content {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .scene-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .scene-number {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            background: rgba(56, 189, 248, 0.1);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+        }
+
+        .scene-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .badge-core { background: rgba(52, 211, 153, 0.15); color: var(--accent-emerald); }
+        .badge-arch { background: rgba(251, 191, 36, 0.15); color: var(--accent-amber); }
+        .badge-warn { background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); }
+
+        .scene-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .story-script {
+            margin-bottom: 1.25rem;
+        }
+
+        .visual-prompt-box {
+            background: rgba(30, 41, 59, 0.6);
+            border-left: 3px solid var(--accent-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.875rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+
+        .visual-prompt-box strong {
+            color: var(--accent-primary);
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .story-text {
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+            line-height: 1.65;
+        }
+
+        .concept-takeaway {
+            background: var(--code-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 0.85rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .concept-takeaway span.label {
+            font-weight: 700;
+            color: var(--accent-emerald);
+            display: block;
+            margin-bottom: 0.25rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .concept-takeaway code {
+            font-family: var(--font-mono);
+            color: var(--accent-amber);
+            font-size: 0.85rem;
+        }
+
+        /* Action Footer */
+        .page-footer {
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .page-footer a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="tag-pill">Context Engineering Visual Architecture</div>
+        <h1>Context Engineering for Dummies</h1>
+        <p>A complete 8-scene visual storyboard guide explaining why context engineering matters more than prompt engineering, featuring interactive image slots for your generated graphics.</p>
+    </header>
+
+    <div class="storyboard-grid">
+
+        <!-- SCENE 1 -->
+        <article class="scene-card">
+            <div class="scene-visual">
+                <div class="image-preview-container" id="container-1">
+                    <label class="upload-placeholder" for="file-1">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="primary-text">Upload Scene 1 Storyboard Image</span>
+                        <span class="hint">Click or drop PNG / JPEG</span>
+                    </label>
+                    <input type="file" id="file-1" class="file-input" accept="image/*" onchange="previewImage(this, 1)">
+                    <img id="img-1" class="preview-img" alt="Scene 1 Art">
+                    <button class="change-image-btn" id="btn-1" onclick="document.getElementById('file-1').click()">Replace Image</button>
+                </div>
+            </div>
+            <div class="scene-content">
+                <div>
+                    <div class="scene-header">
+                        <span class="scene-number">SCENE 01</span>
+                        <span class="scene-badge badge-core">Core Foundation</span>
+                    </div>
+                    <h2 class="scene-title">The Amnesiac Genius</h2>
+                    
+                    <div class="visual-prompt-box">
+                        <strong>Storyboard Visual</strong>
+                        A sleek office. An employee with sharp, cybernetic eyes sits behind a completely clean desk. The manager slaps down a single sticky note. The worker smiles warmly: <em>"Good morning! Who are you, and what do I do?"</em>
+                    </div>
+
+                    <p class="story-text">
+                        Imagine hiring a brilliant employee every morning. He reasons swiftly, parses nuance, and codes flawlessly. But every midnight, his memory wipes completely. Everything he knows in the morning is strictly what sits on his desk when he sits down. That is your AI model. What you place on that desk is <strong>Context Engineering</strong>.
+                    </p>
+                </div>
+
+                <div class="concept-takeaway">
+                    <span class="label">Key Principle</span>
+                    LLMs possess high reasoning but zero persistent state between calls. Intelligence doesn't matter if the workspace is blank or disorganized.
+                </div>
+            </div>
+        </article>
+
+        <!-- SCENE 2 -->
+        <article class="scene-card">
+            <div class="scene-visual">
+                <div class="image-preview-container" id="container-2">
+                    <label class="upload-placeholder" for="file-2">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="primary-text">Upload Scene 2 Storyboard Image</span>
+                        <span class="hint">Click or drop PNG / JPEG</span>
+                    </label>
+                    <input type="file" id="file-2" class="file-input" accept="image/*" onchange="previewImage(this, 2)">
+                    <img id="img-2" class="preview-img" alt="Scene 2 Art">
+                    <button class="change-image-btn" id="btn-2" onclick="document.getElementById('file-2').click()">Replace Image</button>
+                </div>
+            </div>
+            <div class="scene-content">
+                <div>
+                    <div class="scene-header">
+                        <span class="scene-number">SCENE 02</span>
+                        <span class="scene-badge badge-arch">Strategy Shift</span>
+                    </div>
+                    <h2 class="scene-title">Prompting vs. Context Engineering</h2>
+                    
+                    <div class="visual-prompt-box">
+                        <strong>Storyboard Visual</strong>
+                        Split comparison: On the left, a manager obsessively rewrites a note in gold calligraphy while an avalanche of random binders buries the desk. On the right, the manager organizes exactly three clean folders and a sharp pencil.
+                    </div>
+
+                    <p class="story-text">
+                        For years, developers obsessed over <em>prompt engineering</em>—tweaking adjectives, removing ambiguity, and polishing phrasing. But even a Shakespearean note fails if the desk has the wrong manuals. Context engineering is the holistic system design of curating everything on that desk.
+                    </p>
+                </div>
+
+                <div class="concept-takeaway">
+                    <span class="label">Key Principle</span>
+                    Prompt engineering is writing the note. Context engineering is assembling the whole desk: System Note, Documents, Memory, and Tools.
+                </div>
+            </div>
+        </article>
+
+        <!-- SCENE 3 -->
+        <article class="scene-card">
+            <div class="scene-visual">
+                <div class="image-preview-container" id="container-3">
+                    <label class="upload-placeholder" for="file-3">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="primary-text">Upload Scene 3 Storyboard Image</span>
+                        <span class="hint">Click or drop PNG / JPEG</span>
+                    </label>
+                    <input type="file" id="file-3" class="file-input" accept="image/*" onchange="previewImage(this, 3)">
+                    <img id="img-3" class="preview-img" alt="Scene 3 Art">
+                    <button class="change-image-btn" id="btn-3" onclick="document.getElementById('file-3').click()">Replace Image</button>
+                </div>
+            </div>
+            <div class="scene-content">
+                <div>
+                    <div class="scene-header">
+                        <span class="scene-number">SCENE 03</span>
+                        <span class="scene-badge badge-core">Desk Item 1</span>
+                    </div>
+                    <h2 class="scene-title">The Task Note: Principles vs. Mazes</h2>
+                    
+                    <div class="visual-prompt-box">
+                        <strong>Storyboard Visual</strong>
+                        Top: An agent suffocating in a 50-step <code>if/else</code> flowchart taped across the wall. Bottom: The agent calmly glancing at a concise placard: <em>"Approve refunds under 14 days. Escalate if >$100. Use judgment."</em>
+                    </div>
+
+                    <p class="story-text">
+                        Rigid decision trees break on unexpected edge cases. Over-specifying rules causes agents to act like brittle automata or get trapped in contradictions. Setting clear <strong>principles and firm boundaries</strong> unlocks the model's inherent common sense without risking out-of-bounds behavior.
+                    </p>
+                </div>
+
+                <div class="concept-takeaway">
+                    <span class="label">Key Principle</span>
+                    Avoid the instruction maze. Frame roles with concise principles + hard guardrails rather than 50 lines of nested conditional logic.
+                </div>
+            </div>
+        </article>
+
+        <!-- SCENE 4 -->
+        <article class="scene-card">
+            <div class="scene-visual">
+                <div class="image-preview-container" id="container-4">
+                    <label class="upload-placeholder" for="file-4">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="primary-text">Upload Scene 4 Storyboard Image</span>
+                        <span class="hint">Click or drop PNG / JPEG</span>
+                    </label>
+                    <input type="file" id="file-4" class="file-input" accept="image/*" onchange="previewImage(this, 4)">
+                    <img id="img-4" class="preview-img" alt="Scene 4 Art">
+                    <button class="change-image-btn" id="btn-4" onclick="document.getElementById('file-4').click()">Replace Image</button>
+                </div>
+            </div>
+            <div class="scene-content">
+                <div>
+                    <div class="scene-header">
+                        <span class="scene-number">SCENE 04</span>
+                        <span class="scene-badge badge-arch">Desk Item 2</span>
+                    </div>
+                    <h2 class="scene-title">The Right Documents: Precision RAG</h2>
+                    
+                    <div class="visual-prompt-box">
+                        <strong>Storyboard Visual</strong>
+                        Left: A forklift dumps a 4,000-page monorepo binder onto the worker. Right: A funnel where a large net catches 50 candidates, a magnifying glass reranks them to 5 sharp cards, delivering only the exact 12 lines needed.
+                    </div>
+
+                    <p class="story-text">
+                        The most expensive mistake is dumping whole files when 12 lines were needed. Context engineering uses a two-pass system: <strong>high-recall vector search</strong> (top_k=50) followed by <strong>high-precision reranking</strong> (top 5), or Just-In-Time file reads via tools.
+                    </p>
+                </div>
+
+                <div class="concept-takeaway">
+                    <span class="label">Key Principle</span>
+                    <code>candidates = search(k=50) → rerank(candidates)[:5]</code>. Cast wide for recall, rerank for precision. Keep the desk clear of stale indices.
+                </div>
+            </div>
+        </article>
+
+        <!-- SCENE 5 -->
+        <article class="scene-card">
+            <div class="scene-visual">
+                <div class="image-preview-container" id="container-5">
+                    <label class="upload-placeholder" for="file-5">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="primary-text">Upload Scene 5 Storyboard Image</span>
+                        <span class="hint">Click or drop PNG / JPEG</span>
+                    </label>
+                    <input type="file" id="file-5" class="file-input" accept="image/*" onchange="previewImage(this, 5)">
+                    <img id="img-5" class="preview-img" alt="Scene 5 Art">
+                    <button class="change-image-btn" id="btn-5" onclick="document.getElementById('file-5').click()">Replace Image</button>
+                </div>
+            </div>
+            <div class="scene-content">
+                <div>
+                    <div class="scene-header">
+                        <span class="scene-number">SCENE 05</span>
+                        <span class="scene-badge badge-arch">Desk Item 3</span>
+                    </div>
+                    <h2 class="scene-title">The Notebook in the Drawer</h2>
+                    
+                    <div class="visual-prompt-box">
+                        <strong>Storyboard Visual</strong>
+                        Top: 200 bloated message receipts piling up, stealing attention. Bottom: Old receipts fed into a mini-compressor spitting out a summary card, while a notebook labeled <code>project_notes.md</code> is stored safely inside a desk drawer.
+                    </div>
+
+                    <p class="story-text">
+                        Never let conversation history grow infinitely—old turns distract the model and inflate token bills. <strong>Compact</strong> older dialogue into rolling summaries. For multi-session memories (user preferences, conventions), keep a file in the drawer and load it only on demand.
+                    </p>
+                </div>
+
+                <div class="concept-takeaway">
+                    <span class="label">Key Principle</span>
+                    Short-term memory = Compaction (keep last 10 turns + summary). Long-term memory = External notebook files outside the active context.
+                </div>
+            </div>
+        </article>
+
+        <!-- SCENE 6 -->
+        <article class="scene-card">
+            <div class="scene-visual">
+                <div class="image-preview-container" id="container-6">
+                    <label class="upload-placeholder" for="file-6">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="primary-text">Upload Scene 6 Storyboard Image</span>
+                        <span class="hint">Click or drop PNG / JPEG</span>
+                    </label>
+                    <input type="file" id="file-6" class="file-input" accept="image/*" onchange="previewImage(this, 6)">
+                    <img id="img-6" class="preview-img" alt="Scene 6 Art">
+                    <button class="change-image-btn" id="btn-6" onclick="document.getElementById('file-6').click()">Replace Image</button>
+                </div>
+            </div>
+            <div class="scene-content">
+                <div>
+                    <div class="scene-header">
+                        <span class="scene-number">SCENE 06</span>
+                        <span class="scene-badge badge-core">Desk Item 4</span>
+                    </div>
+                    <h2 class="scene-title">Tools & Self-Correcting Errors</h2>
+                    
+                    <div class="visual-prompt-box">
+                        <strong>Storyboard Visual</strong>
+                        Left: 5 nearly identical staplers (<code>find_user</code>, <code>lookup_user</code>, <code>search_users</code>) causing decision paralysis. Right: One unified tool <code>get_user(id)</code> with a popup sign: <em>"Missing ID? Run search_user() first!"</em>
+                    </div>
+
+                    <p class="story-text">
+                        Too many overlapping tool definitions consume prompt tokens on every turn and trigger hallucinations. Ruthlessly simplify to one clear tool per job. When a tool fails, return <strong>actionable error messages</strong> that coach the agent toward recovery rather than raw stack traces.
+                    </p>
+                </div>
+
+                <div class="concept-takeaway">
+                    <span class="label">Key Principle</span>
+                    One clear contract per tool. Write errors designed for LLMs (hinting the next logical step) instead of cryptic human exceptions.
+                </div>
+            </div>
+        </article>
+
+        <!-- SCENE 7 -->
+        <article class="scene-card">
+            <div class="scene-visual">
+                <div class="image-preview-container" id="container-7">
+                    <label class="upload-placeholder" for="file-7">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="primary-text">Upload Scene 7 Storyboard Image</span>
+                        <span class="hint">Click or drop PNG / JPEG</span>
+                    </label>
+                    <input type="file" id="file-7" class="file-input" accept="image/*" onchange="previewImage(this, 7)">
+                    <img id="img-7" class="preview-img" alt="Scene 7 Art">
+                    <button class="change-image-btn" id="btn-7" onclick="document.getElementById('file-7').click()">Replace Image</button>
+                </div>
+            </div>
+            <div class="scene-content">
+                <div>
+                    <div class="scene-header">
+                        <span class="scene-number">SCENE 07</span>
+                        <span class="scene-badge badge-warn">Context Rot</span>
+                    </div>
+                    <h2 class="scene-title">The "Lost in the Middle" Trap</h2>
+                    
+                    <div class="visual-prompt-box">
+                        <strong>Storyboard Visual</strong>
+                        An ultra-long desk stretching across the room. The worker can clearly see the note pinned to the front edge and the monitor at the far back edge, but everything piled in the middle is shrouded in thick fog.
+                    </div>
+
+                    <p class="story-text">
+                        A million-token window doesn't mean you should dump a million tokens on the desk. Due to <em>context rot</em>, models suffer degradation when recalling facts buried deep in the middle. Strategic context ordering places system prompts at top and immediate questions at the very end.
+                    </p>
+                </div>
+
+                <div class="concept-takeaway">
+                    <span class="label">Key Principle</span>
+                    Assemble context dynamically: filter before ingestion, and position high-priority directives at the primacy and recency edges.
+                </div>
+            </div>
+        </article>
+
+        <!-- SCENE 8 -->
+        <article class="scene-card">
+            <div class="scene-visual">
+                <div class="image-preview-container" id="container-8">
+                    <label class="upload-placeholder" for="file-8">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="primary-text">Upload Scene 8 Storyboard Image</span>
+                        <span class="hint">Click or drop PNG / JPEG</span>
+                    </label>
+                    <input type="file" id="file-8" class="file-input" accept="image/*" onchange="previewImage(this, 8)">
+                    <img id="img-8" class="preview-img" alt="Scene 8 Art">
+                    <button class="change-image-btn" id="btn-8" onclick="document.getElementById('file-8').click()">Replace Image</button>
+                </div>
+            </div>
+            <div class="scene-content">
+                <div>
+                    <div class="scene-header">
+                        <span class="scene-number">SCENE 08</span>
+                        <span class="scene-badge badge-core">Future Horizon</span>
+                    </div>
+                    <h2 class="scene-title">Standardized Desk & Orchestration</h2>
+                    
+                    <div class="visual-prompt-box">
+                        <strong>Storyboard Visual</strong>
+                        A modular desk equipped with universal <strong>MCP</strong> snap-on ports. Autonomous drone subagents receive compiled code scripts from the worker and execute micro-tasks across the room in parallel.
+                    </div>
+
+                    <p class="story-text">
+                        The future of agentic architecture is standardization. With <strong>Model Context Protocol (MCP)</strong> and <strong>Agent-to-Agent (A2A)</strong> protocols, the desk remains spotless. Plans are compiled into executable code farmed out to parallel subagents, keeping context overhead near zero.
+                    </p>
+                </div>
+
+                <div class="concept-takeaway">
+                    <span class="label">Key Principle</span>
+                    "AI's problem was never intelligence. It's what gets put on the desk." Master the desk, and you master the agent.
+                </div>
+            </div>
+        </article>
+
+    </div>
+
+    <footer class="page-footer">
+        <p>Context Engineering Storyboard Framework • Built for high-leverage AI architectures</p>
+    </footer>
+</div>
+
+<script>
+    function previewImage(input, sceneId) {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById(`img-${sceneId}`);
+                const placeholder = input.previousElementSibling;
+                const changeBtn = document.getElementById(`btn-${sceneId}`);
+                
+                img.src = e.target.result;
+                img.style.display = 'block';
+                placeholder.style.display = 'none';
+                changeBtn.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Enable drag and drop on placeholders
+    document.querySelectorAll('.upload-placeholder').forEach((placeholder) => {
+        ['dragenter', 'dragover'].forEach(eventName => {
+            placeholder.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                placeholder.style.borderColor = 'var(--accent-primary)';
+                placeholder.style.background = 'var(--accent-glow)';
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            placeholder.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                placeholder.style.borderColor = '#334155';
+                placeholder.style.background = 'rgba(15, 23, 42, 0.4)';
+            });
+        });
+
+        placeholder.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                const input = placeholder.nextElementSibling;
+                input.files = files;
+                const id = input.id.split('-')[1];
+                previewImage(input, id);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
